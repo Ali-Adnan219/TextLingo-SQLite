@@ -1,6 +1,9 @@
 <?php
 
 
+
+is_dir('AllFileDB') || mkdir('AllFileDB');
+
 function generateRandomName($length = 8) {
     $futureDateTime = strtotime('+1 month');
     return $futureDateTime;
