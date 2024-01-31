@@ -98,13 +98,25 @@ if (isset($_FILES['database_file'])) {
     }
 }
 
+if (isset($_GET['edit'])) {
+$editTranslationId = $_GET['edit'];
 
+$queryEditTranslation = "SELECT * FROM translations WHERE id = $editTranslationId";
+$resultEditTranslation = $database->querySingle($queryEditTranslation, true);
 
+$originalTextValue = $resultEditTranslation['original_text'];
+$languageValue = $resultEditTranslation['language'];
+$translationValue = $resultEditTranslation['translation'];
 
+}
 
-// استعلام عن جميع الترجمات المخزنة
-$query = "SELECT * FROM translations";
+$selectedLang = $_GET['lang'] ?? 'all';
+$query = ($selectedLang == 'all') ? "SELECT * FROM translations" : "SELECT * FROM translations WHERE language = '$selectedLang'";
 $result = $database->query($query);
+
+
+
+
 
 ?>
 
@@ -192,28 +204,11 @@ $result = $database->query($query);
     </style>
 </head>
 <body>
-   <h1>إدارة الترجمات</h1>
-
     <div style="display: flex;">
         <!-- نموذج تنزيل قاعدة البيانات -->
         <div style="width: 50%;">
             <h2>تنزيل قاعدة البيانات</h2>
             <p><a href="download.php">تنزيل ملف قاعدة البيانات</a></p>
-            <pre>        
-function getTranslation($language, $text) {
-    // إنشاء اتصال مع قاعدة بيانات SQLite3
-    $database = new SQLite3('translations.db');
-.........
-}
-
-// استخدام الدالة للحصول على الترجمة
-$a = "ar";
-$text = "/start";
-$translation = getTranslation($a, $text);
-
-// عرض الترجمة
-echo "الترجمة: " . $translation;
-            </pre>
             <h2>إضافة ترجمة جديدة</h2>
             <button onclick="copyTextPython()">نسخ كود كامل python</button>
             <button onclick="copyText()">نسخ كود كامل php</button>
@@ -229,12 +224,17 @@ echo "الترجمة: " . $translation;
         <div style="width: 50%;">
             <h2>إضافة ترجمة جديدة</h2>
             <form method="post">
+                <input type="hidden" name="edit_id" value="<?php echo $editTranslationId ?? "" ; ?>">
+
                 <label for="original_text">النص الأصلي:</label>
-                <input type="text" name="original_text" required><br><br>
+                <input type="text" name="original_text" value="<?php echo $originalTextValue ?? ""; ?>" required><br><br>
+
                 <label for="language">لغة الترجمة:</label>
-                <input type="text" name="language" required><br><br>
+                <input type="text" name="language" value="<?php echo $languageValue ?? "" ; ?>" required><br><br>
+
                 <label for="translation">الترجمة:</label>
-                <textarea name="translation" required rows="5" style="width: 100%;"></textarea><br><br>
+                <textarea name="translation" required rows="5" style="width: 100%;"><?php echo $translationValue ?? ""; ?></textarea><br><br>
+
                 <input type="submit" name="save" value="حفظ الترجمة">
             </form>
         </div>
@@ -243,6 +243,23 @@ echo "الترجمة: " . $translation;
  
     <!-- قائمة الترجمات المحفوظة -->
 <h2>قائمة الترجمات</h2>
+    <form method="get" style="text-align: center;">
+        <select name="lang" onchange="this.form.submit()">
+            <option value="all" <?php echo ($selectedLang == 'all' ? 'selected' : ''); ?>>كل اللغات</option>
+            <?php
+            // قراءة اللغات المتوفرة من قاعدة البيانات
+            $queryLanguages = "SELECT DISTINCT language FROM translations";
+            $resultLanguages = $database->query($queryLanguages);
+
+            while ($rowLang = $resultLanguages->fetchArray()) {
+                $lang = $rowLang['language'];
+                echo "<option value='$lang' " . ($selectedLang == $lang ? 'selected' : '') . ">$lang</option>";
+            }
+            ?>
+        </select>
+    </form>
+
+
 <table style="width: 100%; border-collapse: collapse;">
     <tr>
         <th style="background-color: #f2f2f2; padding: 10px;">النص الأصلي</th>
@@ -257,6 +274,7 @@ echo "الترجمة: " . $translation;
             <td style="padding: 10px;"><?php echo $row['translation']; ?></td>
             <td style="padding: 10px;">
                 <a href="?delete=<?php echo $row['id']; ?>" style="color: red;">حذف</a>
+                <a href="?edit=<?php echo $row['id']; ?>" style="color: blue;">تعديل</a>
             </td>
         </tr>
     <?php endwhile; ?>
@@ -276,7 +294,7 @@ echo "الترجمة: " . $translation;
 
         function copyText() {
         var text =`
-function getTranslation($language, $text) {
+function getTranslation($language, $text, $variables = []) {
     // إنشاء اتصال مع قاعدة بيانات SQLite3
     $database = new SQLite3('translations.db');
 
@@ -294,6 +312,11 @@ function getTranslation($language, $text) {
         $row = $result->fetchArray();
         $translation = $row['translation'];
 
+        // استبدال المتغيرات في الترجمة إذا كانت متاحة
+        if (!empty($variables)) {
+            $translation = vsprintf($translation, $variables);
+        }
+
         // إغلاق اتصال قاعدة البيانات
         $database->close();
 
@@ -304,24 +327,22 @@ function getTranslation($language, $text) {
         $database->close();
 
         // استعادة الترجمة باللغة الإنجليزية (en) إذا لم تكن متاحة الترجمة باللغة المحددة
-        $translation = getTranslation('en', $text);
+        $translation = getTranslation('en', $text, $variables);
 
         // إرجاع الترجمة الموجودة باللغة الإنجليزية
         return $translation;
     }
 }
 
-// استخدام الدالة للحصول على الترجمة
+// استخدام الدالة للحصول على الترجمة مع متغيرات بالنص مباشرة
 $a = "ar";
-$text = "/start";
-$translation = getTranslation($a, $text);
+$text = "مرحبًا، %s! كيف حالك اليوم؟";
+$variables = ["اسم المستخدم"]; // قائمة المتغيرات
+$translation = getTranslation($a, $text, $variables);
 
 // عرض الترجمة
-echo "الترجمة: " . $translation ."\n";
+echo "الترجمة: " . $translation . "\n";
 
-//في حالة تريد اضافة متغيرات 
-$n=2;
-echo sprintf($translation  ,$n);
 `;
 
         var textarea = document.createElement('textarea');
