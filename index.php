@@ -121,76 +121,93 @@ $result = $database->query($query);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="ar">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   
+
+  
     <title>إدارة الترجمات</title>
     <style>
         body {
-            background-color: #f5f5f5;
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
             margin: 0;
-            padding: 20px;
-            text-align: right; /* تحديد محاذاة النص إلى اليمين */
+            padding: 0;
+            text-align: right;
         }
 
-        h1 {
-            color: #333;
+        header {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px;
+        }
+
+        section {
+            width: 48%;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #4caf50;
         }
 
         form {
-            background-color: #fff;
-            border-radius: 5px;
-            display: inline-block;
-            padding: 20px;
-            text-align: left;
+            margin-top: 20px;
         }
 
         label {
             display: block;
             margin-bottom: 10px;
+            color: #333;
         }
 
-        input[type="text"] {
+        input[type="text"], input[type="file"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
             border: 1px solid #ccc;
-            border-radius: 3px;
-            padding: 5px;
-            width: 300px;
+            border-radius: 5px;
         }
 
-        input[type="submit"] {
+        input[type="submit"], button {
             background-color: #4caf50;
-            border: none;
-            border-radius: 3px;
             color: #fff;
-            cursor: pointer;
-            padding: 10px 20px;
-        }
-
-        button {
-
-             background-color: #4caf50;
             border: none;
-            border-radius: 3px;
-            color: #fff;
-            cursor: pointer;
+            border-radius: 5px;
             padding: 10px 20px;
+            cursor: pointer;
         }
 
         table {
-            background-color: #fff;
-            border-collapse: collapse;
-            margin-top: 20px;
             width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
         }
 
-       th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: right; /* تحديد محاذاة النص إلى اليمين */
+        th, td {
+            padding: 15px;
+            border: 1px solid #ddd;
+            text-align: right;
         }
 
         th {
             background-color: #f2f2f2;
+            color: #333;
         }
 
         a {
@@ -201,12 +218,28 @@ $result = $database->query($query);
         a:hover {
             text-decoration: underline;
         }
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        option {
+            background-color: #fff;
+            color: #333;
+        }
     </style>
 </head>
 <body>
-    <div style="display: flex;">
-        <!-- نموذج تنزيل قاعدة البيانات -->
-        <div style="width: 50%;">
+    <header>
+        <h1>إدارة الترجمات</h1>
+    </header>
+
+    
+    <div class="container">
+        <section>
             <h2>تنزيل قاعدة البيانات</h2>
             <p><a href="download.php">تنزيل ملف قاعدة البيانات</a></p>
             <h2>إضافة ترجمة جديدة</h2>
@@ -215,14 +248,14 @@ $result = $database->query($query);
             <button onclick="deleteDatabase()">حذف قاعدة البيانات</button>
             <form method="post" enctype="multipart/form-data">
                 <label for="database_file">قاعدة البيانات الجديدة:</label>
-                <input type="file" name="database_file" required><br><br>
+                <input type="file" name="database_file" required>
                 <input type="submit" name="savedata" value="حفظ قاعدة البيانات">
             </form>
-        </div>
+        </section>
 
-         <!-- نموذج إضافة ترجمة جديدة -->
-        <div style="width: 50%;">
+        <section>
             <h2>إضافة ترجمة جديدة</h2>
+            <form method="post">
             <form method="post">
                 <input type="hidden" name="edit_id" value="<?php echo $editTranslationId ?? "" ; ?>">
 
@@ -271,10 +304,11 @@ $result = $database->query($query);
         <tr>
             <td style="padding: 10px;"><?php echo $row['original_text']; ?></td>
             <td style="padding: 10px;"><?php echo $row['language']; ?></td>
-            <td style="padding: 10px;"><?php echo $row['translation']; ?></td>
+            <td style="padding: 10px;"><?php echo nl2br($row['translation']); ?></td>
             <td style="padding: 10px;">
                 <a href="?delete=<?php echo $row['id']; ?>" style="color: red;">حذف</a>
                 <a href="?edit=<?php echo $row['id']; ?>" style="color: blue;">تعديل</a>
+                    
             </td>
         </tr>
     <?php endwhile; ?>
@@ -425,6 +459,11 @@ print("الترجمة:", translation)
                window.location.href = "deleteDB.php";
             }
         }
+
+
+       
+
+        
     </script>
 </body>
 </html>
