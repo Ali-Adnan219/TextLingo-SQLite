@@ -240,18 +240,32 @@ $result = $database->query($query);
     
     <div class="container">
         <section>
-            <h2>تنزيل قاعدة البيانات</h2>
-            <p><a href="download.php">تنزيل ملف قاعدة البيانات</a></p>
-            <h2>إضافة ترجمة جديدة</h2>
-            <button onclick="copyTextPython()">نسخ كود كامل python</button>
-            <button onclick="copyText()">نسخ كود كامل php</button>
-            <button onclick="deleteDatabase()">حذف قاعدة البيانات</button>
-            <form method="post" enctype="multipart/form-data">
-                <label for="database_file">قاعدة البيانات الجديدة:</label>
-                <input type="file" name="database_file" required>
-                <input type="submit" name="savedata" value="حفظ قاعدة البيانات">
-            </form>
-        </section>
+    <h2>إضافة ترجمة جديدة</h2>
+    <form method="post" enctype="multipart/form-data">
+        <label for="database_file">قاعدة البيانات الجديدة:</label>
+        <input type="file" name="database_file" required>
+        <input type="submit" name="savedata" value="حفظ قاعدة البيانات">
+    </form>
+
+    <h2>استيراد ملف JSON</h2>
+    <form method="post" enctype="multipart/form-data"  action="import.php">
+        <input type="file" name="json_file" accept=".json" required>
+        <input type="submit" name="import_json" value="JSON استيراد ملف ">
+    </form>
+
+    <h2>تصدير البيانات</h2>
+    <button onclick="exportToJSON()">JSON تصدير إلى </button>
+    <button onclick="exportToCSV()">CSV تصدير إلى </button>
+
+    <h2>إدارة قاعدة البيانات</h2>
+    <button onclick="copyTextPython()">نسخ كود كامل python</button>
+    <button onclick="copyText()">نسخ كود كامل php</button>
+    <button onclick="deleteDatabase()">حذف قاعدة البيانات</button>
+
+    <h2>تنزيل ملف قاعدة البيانات</h2>
+    <h4><a href="download.php">اضغط هنا</a></h4>
+</section>
+
 
         <section>
             <h2>إضافة ترجمة جديدة</h2>
@@ -290,6 +304,8 @@ $result = $database->query($query);
             }
             ?>
         </select>
+
+
     </form>
 
 
@@ -462,6 +478,16 @@ print("الترجمة:", translation)
 
 
        
+
+    function exportToJSON() {
+        window.location.href = 'export.php?export=json';
+    }
+
+
+    function exportToCSV() {
+        window.location.href = 'export.php?export=csv';
+    }
+
 
         
     </script>
